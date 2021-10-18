@@ -1,6 +1,8 @@
 import TableItem from "./TableItem";
 
+
 const TableList = ({ data }) => {
+    console.log(data);
     return (
       <table className="table">
           <thead>
@@ -13,8 +15,8 @@ const TableList = ({ data }) => {
           </tr>
           </thead>
           <tbody>
-          {data.map((item) => {
-              return <TableItem rowData={item} key={item.id}/>;
+          {[...data].map((item) => {
+              return <TableItem rowData={item} key={item[1].id}/>;
           })}
           </tbody>
       </table>
