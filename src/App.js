@@ -15,50 +15,55 @@ const App = () => {
     });
     const [isFilterMenu, setIsFilterMenu] = useState(false);
     const [listOfTasks, setListOfTasks] = useState(new Map());
+    const [completedTasks, setCompletedTasks] = useState(new Map());
+    const [inProgressTasks, setInProgressTasks] = useState(new Map());
+    const [isCompleted, setIsCompleted] = useState(false);
+    const [isInProgress, setIsInProgress] = useState(false);
     const [idTodo, setIdTodo] = useState(0);
 
-    // useEffect(() => {
-    //     const tableData = JSON.parse(localStorage.getItem('tableData'));
-    //     setListOfTasks(tableData);
-    // }, []);
+    useEffect(() => {
+        setListOfTasks(new Map(JSON.parse(localStorage.tableData)));
+    }, []);
 
-    // useEffect(() => {
-    //     localStorage.setItem('tableData', JSON.stringify(listOfTasks));
-    // }, [listOfTasks]);
-    //
+    useEffect(() => {
+        localStorage.setItem('tableData', JSON.stringify(Array.from(listOfTasks.entries())));
+    }, [listOfTasks]);
 
-    console.log(listOfTasks);
+    const completed = () => {
+        const newArr = [...listOfTasks].filter((item) => item[1].status === status.COMPLETED);
+        setCompletedTasks(new Map(newArr));
+    };
 
+    const inProgress = () => {
+        const newArr = [...listOfTasks].filter((item) => item[1].status === status.IN_PROGRESS);
+        setInProgressTasks(new Map(newArr));
+    };
 
     const addNewRowInTable = () => {
         const id = idTodo + 1;
         setIdTodo(id);
-        listOfTasks.set(`todo${id}`, {
-              id: idTodo + 1,
-              title: taskData.title,
-              description: taskData.description,
-              status: status.IN_PROGRESS
-          }
-        );
-        setListOfTasks(listOfTasks);
+        (taskData.title && taskData.description) === '' ?
+          window.alert('The fields should not be empty')
+          : listOfTasks.set(`todo${id}`, {
+                id: idTodo + 1,
+                title: taskData.title,
+                description: taskData.description,
+                status: status.IN_PROGRESS
+            }
+          );
+        setListOfTasks(new Map(listOfTasks));
     };
 
     const removeTask = (key) => {
         const newList = listOfTasks;
         newList.delete(key);
 
-        setListOfTasks(newList);
+        setListOfTasks(new Map(newList));
     };
 
     const changeStatus = (id) => {
-        listOfTasks.set(`todo${id}`, {
-              id: idTodo + 1,
-              title: taskData.title,
-              description: taskData.description,
-              status: status.COMPLETED
-          }
-        );
-        setListOfTasks(listOfTasks);
+        listOfTasks.get(`todo${id}`).status = 'completed';
+        setListOfTasks(new Map(listOfTasks));
     };
 
     return (
@@ -71,14 +76,18 @@ const App = () => {
                   </div>
                   <div className="filterList">
                       {isFilterMenu ?
-                        <FilterList
+                        <FilterList completed={completed}
+                                    inProgress={inProgress}
+                                    setIsCompleted={setIsCompleted}
+                                    setIsInProgress={setIsInProgress}
                         /> : null}
                   </div>
               </div>
-              <TableList data={listOfTasks}
-                // data={(statusList.all || (statusList.completed && statusList.inProgress)) ? arrOfTasks :
-                //   statusList.completed ? completedTasks :
-                //     statusList.inProgress ? inProgressTasks : arrOfTasks}
+              <TableList
+                data={(isCompleted && isInProgress) ? listOfTasks :
+                  isCompleted ? completedTasks :
+                    isInProgress ? inProgressTasks :
+                      listOfTasks}
               />
               <Input
                 addNewRowInTable={addNewRowInTable}
